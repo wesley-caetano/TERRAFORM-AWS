@@ -8,3 +8,4 @@ EC2: Grupos de Segurança, AMI Ubuntu 20.04
 
 RDS:Myslq 5.7.44
 
+Sinta-se a vontade para trazer novas melhorias :)
