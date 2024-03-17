@@ -206,24 +206,26 @@ resource "aws_db_subnet_group" "meu_gp_subnet" {
   subnet_ids = [aws_subnet.subs-pva.id, aws_subnet.sub-pvb.id]
 }
 
-resource "aws_lb" "my_load_balancer" {
-  name               = "my-public-load-balancer"
+resource "aws_lb" "my_lb" {
+  name               = "my-load-balancer"
   internal           = false
   load_balancer_type = "application"
-  
-  subnets = [aws_subnet.sub_net_pa.id, aws_subnet.sub_net_pb.id]
-  
+  security_groups    = [aws_security_group.my_security_group.id]
+  subnets            = [aws_subnet.sub_net_pa.id, aws_subnet.sub_net_pb.id]
+
+  enable_deletion_protection = false
+
   tags = {
-    Name = "my-public-load-balancer"
+    Name = "my-load-balancer"
   }
 }
 
-resource "aws_lb_listener" "http_listener" {
-  load_balancer_arn = aws_lb.my_load_balancer.arn
+resource "aws_lb_listener" "meu_listener" {
+  load_balancer_arn = aws_lb.my_lb.arn
   port              = 80
   protocol          = "HTTP"
 
-default_action {
+  default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.my_target_group.arn
   }
@@ -233,11 +235,65 @@ resource "aws_lb_target_group" "my_target_group" {
   name        = "my-target-group"
   port        = 80
   protocol    = "HTTP"
-  vpc_id      = aws_vpc.main-vpc.id
   target_type = "instance"
+  vpc_id      = aws_vpc.main-vpc.id 
+
+  health_check {
+    path                = "/health"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    matcher             = "200-399"
+  }
 }
-resource "aws_lb_target_group_attachment" "my_target_group_attachment" {
+
+resource "aws_lb_target_group_attachment" "meu_attachment" {
   target_group_arn = aws_lb_target_group.my_target_group.arn
-  target_id        = aws_instance.teste_ec2.id  # Substitua pelo ID da sua instância
+  target_id        = aws_instance.teste_ec2.id
 }
+
+
+resource "aws_launch_template" "meu-template" {
+  name = "meu-template"
+
+  block_device_mappings {
+    device_name = "/dev/xvda"
+
+    ebs {
+      volume_size = 8
+      volume_type = "gp2"
+    }
+  }
+
+  network_interfaces {
+
+    security_groups       = [aws_security_group.my_security_group.id]
+  }
+
+  image_id = "ami-0cd59ecaf368e5ccf" # Substitua pela AMI da sua instância
+  instance_type = "t2.micro" # Substitua pelo tipo de instância da sua instância
+  key_name = "CHAVE-PROJETO" # Substitua pelo nome do seu par de chaves
+
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name = "example-instance"
+    }
+  }
+}
+
+resource "aws_autoscaling_group" "meu-gp-autoscalling" {
+  name                 = "meu-autoscalling"
+  launch_template {
+    id      = aws_launch_template.meu-template.id
+    version = "$Latest"
+  }
+
+  vpc_zone_identifier  = [aws_subnet.subs-pva.id, aws_subnet.sub-pvb.id] # Substitua pelos IDs das suas sub-redes privadas
+  
+  target_group_arns    = [aws_lb_target_group.my_target_group.arn] # Substitua pelo ARN do seu target group
+  min_size             = 2
+  desired_capacity     = 2
+  max_size             = 3
 
