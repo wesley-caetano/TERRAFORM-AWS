@@ -283,17 +283,37 @@ resource "aws_launch_template" "meu-template" {
   }
 }
 
-resource "aws_autoscaling_group" "meu-gp-autoscalling" {
-  name                 = "meu-autoscalling"
+resource "aws_autoscaling_group" "meu-autoscaling-gp" {
+  name                      = "Autoscaling Group"
+  vpc_zone_identifier       = [aws_subnet.subs-pva.id, aws_subnet.sub-pvb.id]
+  max_size                  = 3
+  min_size                  = 2
+  health_check_grace_period = 240
+  health_check_type         = "ELB"
+  force_delete              = true
+  target_group_arns         = [aws_lb_target_group.my_target_group.id]
+
   launch_template {
     id      = aws_launch_template.meu-template.id
-    version = "$Latest"
+    version = aws_launch_template.meu-template.latest_version
   }
+}
 
-  vpc_zone_identifier  = [aws_subnet.subs-pva.id, aws_subnet.sub-pvb.id] # Substitua pelos IDs das suas sub-redes privadas
-  
-  target_group_arns    = [aws_lb_target_group.my_target_group.arn] # Substitua pelo ARN do seu target group
-  min_size             = 2
-  desired_capacity     = 2
-  max_size             = 3
+resource "aws_autoscaling_policy" "scaleup" {
+  name                   = "Scale Up"
+  autoscaling_group_name = aws_autoscaling_group.meu-autoscaling-gp.name
+  adjustment_type        = "ChangeInCapacity"
+  scaling_adjustment     = "1"
+  cooldown               = "180"
+  policy_type            = "SimpleScaling"
+}
+
+resource "aws_autoscaling_policy" "scaledown" {
+  name                   = "Scale Down"
+  autoscaling_group_name = aws_autoscaling_group.meu-autoscaling-gp.name
+  adjustment_type        = "ChangeInCapacity"
+  scaling_adjustment     = "-1"
+  cooldown               = "180"
+  policy_type            = "SimpleScaling"
+}
 
