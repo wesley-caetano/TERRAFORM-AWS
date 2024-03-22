@@ -6,8 +6,8 @@ VPC: Rede, Sub-redes, tabela de rotas, NAT GATEWAY, Gateway de Internet, IP Elas
 
 EC2: Grupos de Segurança, AMI Ubuntu 20.04
 
-RDS:Myslq 5.7.44
+RDS: Myslq 5.7.44
 
-Load Balancer
+Load Balancer, Auto Scaling
 
 Sinta-se a vontade para trazer novas melhorias :)
