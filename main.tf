@@ -140,7 +140,7 @@ resource "aws_security_group" "my_security_group" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["186.249.155.155/32"] # Substitua pelo bloco CIDR da sua rede para SSH
+    cidr_blocks = ["xxx.xxx.xxx.xxx/32"] # Substitua pelo bloco CIDR da sua rede para SSH
   }
 
   ingress {
@@ -156,6 +156,12 @@ resource "aws_security_group" "my_security_group" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"] # Permite HTTPS de qualquer lugar
   }
+   egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"                             # todos os protocolos
+    cidr_blocks = ["0.0.0.0/0"]   # permite saída para qualquer lugar
+ 
 }
 
 resource "aws_instance" "teste_ec2" {
@@ -191,8 +197,8 @@ resource "aws_db_instance" "meu_db" {
   engine                 = "mysql"
   engine_version         = "5.7.44"
   instance_class         = "db.t2.micro"
-  username               = "rigel"
-  password               = "rigel123"
+  username               = "teste"
+  password               = "teste123"
   publicly_accessible    = false
   skip_final_snapshot    = true
   multi_az               = true
