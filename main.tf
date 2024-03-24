@@ -175,6 +175,18 @@ resource "aws_instance" "teste_ec2" {
   tags = {
     Name = "EC2-DESAFIO"
   }
+
+  user_data = <<-EOF
+              #!/bin/bash
+              apt update -y
+              apt upgrade -y
+              apt install ansible -y
+              git clone https://github.com/wesley-caetano/ANSIBLE.git
+              cd ANSIBLE/
+              sed -i 's/localhost/${aws_db_instance.meu_db.address}/g' roles/wordpress/templates/wp-config.php.j2 
+              ansible-playbook wordpress.yml
+
+              EOF
 }
 
 resource "aws_security_group" "my_db_gp_seguranca" {
