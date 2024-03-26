@@ -166,7 +166,7 @@ resource "aws_security_group" "my_security_group" {
 
 resource "aws_instance" "teste_ec2" {
   ami           = var.ec2_ami_id
-  instance_type = var.instance_type              # Tipo de instância desejado
+  instance_type = var.instance_type # Tipo de instância desejado
   subnet_id     = aws_subnet.sub_net_pa.id
 
   key_name               = "CHAVE-PROJETO" # Substitua pelo nome da sua chave existente
@@ -175,18 +175,14 @@ resource "aws_instance" "teste_ec2" {
   tags = {
     Name = "EC2-DESAFIO"
   }
+  user_data = base64encode(templatefile("${path.module}/templatefile/setup.sh.tp1", {
+    db_name     = aws_db_instance.meu_db.db_name
+    db_username = aws_db_instance.meu_db.username
+    db_password = aws_db_instance.meu_db.password
+    db_address  = aws_db_instance.meu_db.address
+  }))
 
-  user_data = <<-EOF
-              #!/bin/bash
-              apt update -y
-              apt upgrade -y
-              apt install ansible -y
-              git clone https://github.com/wesley-caetano/ANSIBLE.git
-              cd ANSIBLE/
-              sed -i 's/localhost/${aws_db_instance.meu_db.address}/g' roles/wordpress/templates/wp-config.php.j2 
-              ansible-playbook wordpress.yml
 
-              EOF
 }
 
 resource "aws_security_group" "my_db_gp_seguranca" {
