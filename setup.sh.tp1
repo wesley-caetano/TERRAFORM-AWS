@@ -1,0 +1,14 @@
+#!/bin/bash
+
+apt update -y
+apt upgrade -y
+apt install ansible -y
+git clone https://github.com/wesley-caetano/ANSIBLE.git
+cd ANSIBLE/
+sed -i "s/seudbname/${db_name}/g" roles/wordpress/templates/wp-config.php.j2
+sed -i "s/seudbuser/${db_username}/g" roles/wordpress/templates/wp-config.php.j2
+sed -i "s/seudbsenha/${db_password}/g" roles/wordpress/templates/wp-config.php.j2
+sed -i "s/seudbhost/${db_address}/g" roles/wordpress/templates/wp-config.php.j2
+ansible-playbook wordpress.yml
+
+
