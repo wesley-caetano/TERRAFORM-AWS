@@ -10,7 +10,7 @@ RDS: Myslq
 
 Load Balancer, Auto Scaling
 
-User Data para automação da execução do ANSIBLE (Configuração do Wordpress)
+User Data para automação da execução do ANSIBLE e Prometheus (do Wordpress)
 
 TemplateFile
 
