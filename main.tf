@@ -136,32 +136,47 @@ resource "aws_security_group" "my_security_group" {
   vpc_id      = aws_vpc.main-vpc.id
 
 
-  ingress {
+ ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["xxx.xxx.xxx.xxx/32"] # Substitua pelo bloco CIDR da sua rede para SSH
-  }
+    cidr_blocks = ["0.0.0.0/0"] # Substitua pelo bloco CIDR da sua rede para SSH
+}
 
-  ingress {
+ingress {
+    from_port   = 9090
+    to_port     = 9090
+    protocol    = "tcp"
+    cidr_blocks = [var.meu_ip_cidr]
+}
+
+ingress {
+    from_port   = 9100
+    to_port     = 9100
+    protocol    = "tcp"
+    cidr_blocks = [var.meu_ip_cidr]
+}
+
+ingress {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"] # Permite HTTP de qualquer lugar
-  }
+}
 
-  ingress {
+ingress {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"] # Permite HTTPS de qualquer lugar
-  }
-   egress {
+}
+
+egress {
     from_port   = 0
     to_port     = 0
-    protocol    = "-1"                             # todos os protocolos
-    cidr_blocks = ["0.0.0.0/0"]   # permite saída para qualquer lugar
- 
+    protocol    = "-1"          # Permitir todos os protocolos
+    cidr_blocks = ["0.0.0.0/0"] # Permitir para qualquer lugar
+}
 }
 
 resource "aws_instance" "teste_ec2" {
@@ -180,7 +195,7 @@ resource "aws_instance" "teste_ec2" {
     db_username = aws_db_instance.meu_db.username
     db_password = aws_db_instance.meu_db.password
     db_address  = aws_db_instance.meu_db.address
-  }))
+  })) 
 
 
 }
@@ -200,16 +215,17 @@ resource "aws_security_group" "my_db_gp_seguranca" {
 
 resource "aws_db_instance" "meu_db" {
   identifier             = "mydbinstance"
+  db_name                = "wordpress"
   allocated_storage      = 20
   storage_type           = "gp2"
   engine                 = "mysql"
   engine_version         = "5.7.44"
-  instance_class         = "db.t2.micro"
-  username               = "teste"
-  password               = "teste123"
+  instance_class         = "db.t3.micro"
+  username               = "rigel"
+  password               = "rigel123"
   publicly_accessible    = false
   skip_final_snapshot    = true
-  multi_az               = true
+  multi_az               = false
   db_subnet_group_name   = aws_db_subnet_group.meu_gp_subnet.id
   vpc_security_group_ids = [aws_security_group.my_db_gp_seguranca.id]
 
@@ -219,6 +235,7 @@ resource "aws_db_subnet_group" "meu_gp_subnet" {
   name       = "my-db-subnet-group"
   subnet_ids = [aws_subnet.subs-pva.id, aws_subnet.sub-pvb.id]
 }
+
 
 resource "aws_lb" "my_lb" {
   name               = "my-load-balancer"
