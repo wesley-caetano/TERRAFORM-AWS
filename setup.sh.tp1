@@ -3,6 +3,7 @@
 apt update -y
 apt upgrade -y
 apt install ansible -y
+cd /home/ubuntu
 git clone https://github.com/wesley-caetano/ANSIBLE.git
 cd ANSIBLE/
 sed -i "s/seudbname/${db_name}/g" roles/wordpress/templates/wp-config.php.j2
@@ -10,5 +11,22 @@ sed -i "s/seudbuser/${db_username}/g" roles/wordpress/templates/wp-config.php.j2
 sed -i "s/seudbsenha/${db_password}/g" roles/wordpress/templates/wp-config.php.j2
 sed -i "s/seudbhost/${db_address}/g" roles/wordpress/templates/wp-config.php.j2
 ansible-playbook wordpress.yml
+cd /home/ubuntu
+wget https://github.com/prometheus/node_exporter/releases/download/v1.7.0/node_exporter-1.7.0.linux-amd64.tar.gz
+tar xvfz node_exporter-1.7.0.linux-amd64.tar.gz
+cd node_exporter-1.7.0.linux-amd64/
+./node_exporter &
+sleep 5
+cd /home/ubuntu
+wget https://github.com/prometheus/prometheus/releases/download/v2.51.1/prometheus-2.51.1.linux-amd64.tar.gz
+tar xvfz prometheus-2.51.1.linux-amd64.tar.gz
+cd prometheus-2.51.1.linux-amd64/
+rm -f prometheus.yml
+cd /home/ubuntu/
+git clone https://github.com/wesley-caetano/prometheus.git
+cd prometheus/
+mv prometheus.yml /home/ubuntu/prometheus-2.51.1.linux-amd64/
+cd /home/ubuntu/prometheus-2.51.1.linux-amd64/
+./prometheus --config.file=prometheus.yml
 
 
