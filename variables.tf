@@ -46,3 +46,13 @@ variable "ec2_ami_id" {
 variable "instance_type" {
   default = "t2.micro"
 }
+
+variable "key_name" {
+  default = "SUA-CHAVE"
+}
+
+variable "meu_ip_cidr" {
+  description = "Bloco CIDR endereço IP na AWS"
+  type        = string
+  default     = "xxx.xxx.xxx/xx"                  # seu ip
+}
